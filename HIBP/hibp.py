@@ -12,6 +12,7 @@ try:
 except ModuleNotFoundError:
     print('Requests module not found. Use "pip install requests" to install.')
     exit()
+from time import sleep
 
 # Global variables
 apiurl = 'https://haveibeenpwned.com/api/v2/breachedaccount/'
@@ -45,6 +46,7 @@ def callapi():
                     results[email].append(site)
         else:
             results[email] = []
+        sleep(1.5)
 
 def saveoutput():
     with open(outputfile, 'w') as f:
