@@ -64,17 +64,23 @@ def getActions():
         '\nEnter which URLs numbers to disarm separated by commas, [A] for all, or hit [Enter] to do nothing: ')
     action.replace(' ', '')  # Remove whitespace
     # Validate input
-    if re.search('^(\d+,*)+$', action):  # Remove list of links
+    if re.search('^([1-9]\d*,*)+$', action):  # Remove list of links
         newlinklist = []
         for num in action.split(','):
+            if int(num) > len(linklist):
+                print('URL choice ' + num + ' not found. Exiting.')
+                exit()
             index = int(num)-1  # Reset index referenced to 0
             newlinklist.append(linklist[index])
         linklist = newlinklist  # Rebuild list with choices
         return
     elif re.search('^[aA]{1}$', action):  # Remove all links)
         return
+    elif action == '0':
+        linklist = []
+        return
     else:
-        print('Exiting')
+        print('Doing nothing.')
         exit()
 
 def removeLinks():
@@ -84,10 +90,12 @@ def removeLinks():
     newfilename = name + '-nocanary.' + ext  # Set new zip filename
     newzipped = zipfile.ZipFile(newfilename,'w')  # Create new zip file
     for file in zipped.filelist:
-        content = str(zipped.read(file))  # Read content
+        content = zipped.read(file).decode() # Read content decoded from bytes
         for url in linklist:
-            content = content.replace(url,'')  # Remove URL
-        newzipped.writestr(file, content)  # Write modified file into new zip
+            domain = url.split('/')[2]
+            newurl = url.replace(domain, '127.0.0.1')
+            content = content.replace(url,newurl)  # Remove URL
+        newzipped.writestr(file.filename, content.encode())  # Write modified file into new zip, encoded to bytes
     print('done!\nDisarmed file named ' + newfilename + ' has been created.')
     return
 
