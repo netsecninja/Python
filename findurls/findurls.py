@@ -1,11 +1,17 @@
 #!/usr/bin/python3
 '''
 Title: Find URLs
-Version: 1.0
+Version: 1.1
 Created by: Jeremiah Bess - jeremiah.bess@gmail.com
 Description: Script find and output all URLs in office documents
 Resources:
 * https://towardsdatascience.com/how-to-extract-data-from-ms-word-documents-using-python-ed3fbb48c122
+Revisions:
+1.0 - 23 Aug 2019 - Initial release
+1.1 - 26 Aug 2019 - Improved regex match syntax, added query for file://, and changed to case insensitive regex
+
+To do:
+- Set so any links in *_rels display the associated XML element to show technique used
 '''
 
 # Imports
@@ -30,16 +36,16 @@ def getZip():  # Argument parser
         print('Unable to open document:', args.filename[0])
         exit()
 
-def getLinks():  # Collect all http/s URLs
+def getLinks():  # Collect all URLs
     global zipped
     linklist = []
     for file in zipped.namelist():
         content = str(zipped.read(file))
-        links = re.findall('http.*?[^"]+',content)
+        links = re.findall('(?:https?|file):\/\/[^\"&]*',content,flags=re.IGNORECASE)
         for link in links:
             if not checkIgnores(link):  # Omit URLs with whitelisted strings
                 if link not in linklist:  # Verify link does not already exist
-                    linklist.append(link)                    
+                    linklist.append(link)
                     print(link)
     return
 
